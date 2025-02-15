@@ -123,48 +123,83 @@ class MyApp:
 
         def dashboard_page(page, user_id):
             """The dashboard page."""
+#1 FEAT QUICK REPLY BUTTONS
+            # Check that user_id is an integer
             if not isinstance(user_id, int):
                 print("Error: user_id must be an integer")
                 return ft.View("/", controls=[ft.Text("Error: invalid user_id")])
 
+            # Create application instance
             my_app = MyApp(self.user_repo)
+
+            # Bind the on_submit event to the send_message function
             my_app.chat_manager.message_input.on_submit = my_app.chat_manager.send_message
+
+            # Create quick reply buttons
+            quick_buttons = ft.Row(
+                [
+                    ft.ElevatedButton(
+                        "Remind me about the consultation",
+                        on_click=lambda e: my_app.chat_manager.send_message(e, "Reminded me about the consultation")
+                    ),
+                    ft.ElevatedButton(
+                        "Postponement of consultation",
+                        on_click=lambda e: my_app.chat_manager.send_message(e, "Postponement of consultation")
+                    ),
+                    ft.ElevatedButton(
+                        "Cancellation of consultation",
+                        on_click=lambda e: my_app.chat_manager.send_message(e, "Cancellation of consultation")
+                    ),
+                ],
+                alignment=ft.MainAxisAlignment.CENTER
+            )
 
             return ft.View(
                 f"/dashboard/{user_id}",
-                bgcolor="#5B7065",  # Dark green background
+                bgcolor="#5B7065",
                 controls=[
-                    ft.Container(  # Top header section
+                    # Page header
+                    ft.Container(
                         content=ft.Text("Equilibri.Ai", size=42, weight="bold", color="white"),
                         alignment=ft.alignment.top_center,
                         padding=ft.padding.only(top=5, left=20)
                     ),
-                    ft.Row(  # Main content area
+                    ft.Row(
                         controls=[
-                            ft.Container(  # Menu section
+                            # Sidebar menu
+                            ft.Container(
                                 content=ft.Column(
                                     controls=[
-                                        ft.Text("Menu", size=20, weight="bold", color="white"),  # Menu title
-                                        ft.Divider(),  # Divider
-                                        my_app.chat_manager.chat_buttons,  # List of chat buttons
-                                        ft.TextButton("New Chat",
-                                                      on_click=lambda e: my_app.chat_manager.create_new_chat(e)),
+                                        ft.Text("Menu", size=20, weight="bold", color="white"),
+                                        ft.Divider(),
+                                        my_app.chat_manager.chat_buttons,  # Chat list
+                                        ft.TextButton(
+                                            "New Chat",
+                                            on_click=lambda e: my_app.chat_manager.create_new_chat(e)
+                                        ),
                                     ]
                                 ),
-                                bgcolor="#3A3A3A",  # Menu background color
-                                width=250, height=700, padding=10, border_radius=10
+                                bgcolor="#3A3A3A",
+                                width=250,
+                                height=700,
+                                padding=10,
+                                border_radius=10
                             ),
-                            ft.Container(  # Chat section
+                            # Main chat area
+                            ft.Container(
                                 content=ft.Column(
                                     controls=[
-                                        my_app.chat_manager.header,  # Chat header
-                                        ft.Container(  # Chat display
-                                            my_app.chat_manager.chat_display,
-                                            height=500, expand=True, padding=10
+                                        my_app.chat_manager.header,  # Chat title
+                                        ft.Container(
+                                            my_app.chat_manager.chat_display,  # Chat history area
+                                            height=400,
+                                            expand=True,
+                                            padding=10
                                         ),
-                                        ft.Row(  # Message input and send button
+                                        quick_buttons,  # Quick reply buttons above input
+                                        ft.Row(
                                             [
-                                                my_app.chat_manager.message_input,
+                                                my_app.chat_manager.message_input,  # Input field
                                                 ft.IconButton(
                                                     icon=ft.Icons.SEND,
                                                     icon_color=ft.Colors.BLACK,
@@ -174,28 +209,32 @@ class MyApp:
                                             ],
                                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN
                                         ),
-                                        ft.Row(  # Clear chat button
+                                        ft.Row(
                                             [
                                                 ft.ElevatedButton(
-                                                    "Clear Chat",  # Button to clear chat
+                                                    "Clear Chat",
                                                     on_click=lambda e: my_app.chat_manager.clear_chat(e),
-                                                    # Call clear_chat function
-                                                    bgcolor=ft.Colors.WHITE,  # Updated enum
-                                                    color=ft.Colors.BLACK  # Updated enum for text color
+                                                    bgcolor=ft.Colors.WHITE,
+                                                    color=ft.Colors.BLACK
                                                 )
                                             ],
-                                            alignment=ft.MainAxisAlignment.END  # Position button at the end
+                                            alignment=ft.MainAxisAlignment.END
                                         ),
                                     ]
                                 ),
-                                bgcolor="#2C2C2C", padding=10, border_radius=10, expand=True,
-                            ),
+                                bgcolor="#2C2C2C",
+                                padding=10,
+                                border_radius=10,
+                                expand=True
+                            )
                         ],
-                        expand=True,
+                        expand=True
                     ),
-                    ft.ElevatedButton("Log Out",
-                                      on_click=lambda e: self.user_manager.clear_user_session() or page.go("/")),
                     # Logout button
+                    ft.ElevatedButton(
+                        "Log Out",
+                        on_click=lambda e: self.user_manager.clear_user_session() or page.go("/")
+                    )
                 ]
             )
 
