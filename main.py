@@ -121,7 +121,7 @@ class MyApp:
             page.go("/")
             page.update()
 
-        def dashboard_page(page, user_id):
+               def dashboard_page(page, user_id):
             """The dashboard page."""
 
             # Check that user_id is an integer
@@ -159,10 +159,31 @@ class MyApp:
                 bgcolor="#5B7065",
                 controls=[
                     # Page header
-                    ft.Container(
-                        content=ft.Text("Equilibri.Ai", size=42, weight="bold", color="white"),
-                        alignment=ft.alignment.top_center,
-                        padding=ft.padding.only(top=5, left=20)
+                    ft.Row(
+                        controls=[
+                            ft.Container(
+                                content=ft.Text("Equilibri.Ai", size=42, weight="bold", color="white"),
+                                alignment=ft.alignment.center,
+                                padding=ft.padding.only(top=5, left=20)
+
+                            ),
+                            ft.IconButton(
+                                icon=ft.Icons.MENU_BOOK,
+                                icon_color="blue400",
+                                icon_size=20,
+                                tooltip="Open privacy & policy",
+                                on_click=lambda _: webbrowser.open(
+                                    "https://www.notion.so/EQUILIBRI-AI-PRIVACY-POLICY-AND-USER-AGREEMENT-1c00d7b1732e806ba92fc3942c784022"
+                                ),
+                            ),
+                            ft.TextButton(
+
+                                on_click=lambda _: webbrowser.open(
+                                    "https://www.notion.so/EQUILIBRI-AI-PRIVACY-POLICY-AND-USER-AGREEMENT-1c00d7b1732e806ba92fc3942c784022"
+                                ),
+
+                            ),
+                        ]
                     ),
                     ft.Row(
                         controls=[
@@ -210,15 +231,17 @@ class MyApp:
                                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN
                                         ),
                                         ft.Row(
-                                            [
+                                            controls=[
                                                 ft.ElevatedButton(
-                                                    "Clear Chat",
-                                                    on_click=lambda e: my_app.chat_manager.clear_chat(e),
-                                                    bgcolor=ft.Colors.WHITE,
-                                                    color=ft.Colors.BLACK
-                                                )
+                                                    text="Remove selected",
+                                                    on_click=my_app.chat_manager.delete_selected_messages,
+                                                ),
+                                                ft.ElevatedButton(
+                                                    text="Clear history",
+                                                    on_click=my_app.chat_manager.clear_chat,
+                                                ),
                                             ],
-                                            alignment=ft.MainAxisAlignment.END
+                                            alignment=ft.MainAxisAlignment.END,
                                         ),
                                     ]
                                 ),
