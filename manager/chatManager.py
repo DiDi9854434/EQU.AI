@@ -68,25 +68,34 @@ class ChatManager:
         # Automatically create the first chat when the app starts
         self.create_new_chat(None)
 
-    def send_message(self, e):
+    def send_message(self, e=None, message_text=None):
         """Send a user message, append it to chat, and get a chatbot response."""
-        user_message = self.message_input.value.strip()  # Get user's input
+        # Если передано сообщение (например, из кнопки), используем его, иначе берём из поля ввода
+        user_message = message_text if message_text else self.message_input.value.strip()
+
         if user_message:
-            # Determine the current message index
+            # Определяем индекс нового сообщения
             message_index = len(self.chat_history[self.current_chat])
 
-            # Append the user message to the chat history
+            # Добавляем сообщение пользователя в историю и в интерфейс
             self.chat_history[self.current_chat].append((f"You: {user_message}", message_index, "user"))
             self.chat_display.controls.append(self.create_message_row(f"You: {user_message}", message_index))
 
-            # Fetch and append the chatbot's response to the chat history
+            # Получаем ответ бота
             bot_response = self.get_bot_response(user_message)
             self.chat_history[self.current_chat].append((f"Bot: {bot_response}", message_index + 1, "bot"))
             self.chat_display.controls.append(self.create_message_row(f"Bot: {bot_response}", message_index + 1))
 
-            # Clear the message input field
-            self.message_input.value = ""
-            e.page.update()  # Update the app UI
+            # Очищаем поле ввода только если сообщение было введено вручную
+            if not message_text:
+                self.message_input.value = ""
+
+            # Обновляем интерфейс чата
+            self.chat_display.update()
+
+            # Если есть объект события (e) и у него есть `page`, обновляем всю страницу
+            if e and hasattr(e, "page"):
+                e.page.update()
 
     def create_message_row(self, text, index):
         """Create a row (message block) for displaying a message with actions (select, delete)."""

@@ -249,6 +249,6 @@ if __name__ == "__main__":
     if connection:
         user_repo = dbc.UserRepository(connection)  # Create user repository if connection is successful
         app = MyApp(user_repo)
-        ft.app(target=app.main)  # Launch the app
+        ft.app(target=app.main)  # Launch the  app
     else:
         print("Failed to establish a database connection!")  # Display error if connection fails
