@@ -30,15 +30,15 @@ class UserRepository:
         try:
             # Читаем user_id из файла
             with open("user_session.txt", "r") as file:
-                user_id = file.read().strip()  # Получаем user_id
+                user_id = file.read().strip()  # Get user_id
 
             with self.db_connection.cursor() as cursor:
                 cursor.execute("SELECT id_chat FROM chats WHERE user_id = %s;", (user_id,))
                 chats = cursor.fetchall()
-                return [chat[0] for chat in chats]  # Возвращаем список id чатов
+                return [chat[0] for chat in chats]  # Return list id chats
 
         except Exception as e:
-            print(f"Ошибка загрузки чатов: {e}")
+            print(f"Error loading chats: {e}")
             return []
 
     def save_message(self, chat_id, user_id, text, is_bot):
@@ -47,20 +47,20 @@ class UserRepository:
             try:
                 with conn.cursor() as cur:
                     cur.execute(
-                        "INSERT INTO messages (user_id, chat_id, text, ms_date, ischat) VALUES (%s, %s, %s, NOW(), %s)",
+                        "INSERT INTO messages (user_id, chat_id, message_text, ms_date, ischat) VALUES (%s, %s, %s, NOW(), %s)",
                         (user_id, chat_id, text, is_bot)
                     )
                     conn.commit()
             except Exception as e:
-                print(f"Ошибка при сохранении сообщения: {e}")
+                print(f"Error saving message: {e}")
             finally:
                 conn.close()
 
     def create_chat(self, chat_date):
         try:
-            # Читаем user_id из файла
+            # Read user_id from file
             with open("user_session.txt", "r") as file:
-                user_id = file.read().strip()  # Получаем user_id как строку
+                user_id = file.read().strip()  # Get user_id as string
 
             with self.db_connection.cursor() as cursor:
                 cursor.execute(
@@ -68,12 +68,12 @@ class UserRepository:
                     (user_id, chat_date)
                 )
                 chat_id = cursor.fetchone()[0]
-                print(f"Чат с id {chat_id} создан успешно!")
+                print(f"Chat with id {chat_id} created successfully!")
                 self.db_connection.commit()
                 return True
 
         except Exception as e:
-            print(f"Ошибка при создании чата: {e}")
+            print(f"Error creating chat: {e}")
             self.db_connection.rollback()
             return False
 
