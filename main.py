@@ -121,95 +121,89 @@ class MyApp:
             page.go("/")
             page.update()
 
-        def dashboard_page(page, user_id):
-            """The dashboard page."""
-            if not isinstance(user_id, int):
-                print("Error: user_id must be an integer")
-                return ft.View("/", controls=[ft.Text("Error: invalid user_id")])
+      def dashboard_page(page, user_id):
+    """The dashboard page."""
 
-            my_app = MyApp(self.user_repo)
-            my_app.chat_manager.message_input.on_submit = my_app.chat_manager.send_message
+    if not isinstance(user_id, int):  # Check that user-id is an integer
+        print("Error: user_id must be an integer")
+        return ft.View("/", controls=[ft.Text("Error: invalid user_id")])  # Display an error message if the user-id is invalid
 
-            return ft.View(
-                f"/dashboard/{user_id}",
-                bgcolor="#5B7065",  # Dark green background
+    # Create an application instance with a connection to the user repository
+    my_app = MyApp(self.user_repo)
+    # Bind the message sending handler
+    my_app.chat_manager.message_input.on_submit = my_app.chat_manager.send_message
+
+    # Creating Quick Reply Buttons
+    quick_buttons = ft.Row(
+        [
+            ft.ElevatedButton("Remind me about the consultation",
+                              on_click=lambda e: my_app.chat_manager.send_message(e, "Reminded me about the consultation")),
+            ft.ElevatedButton("Postponement of consultation",
+                              on_click=lambda e: my_app.chat_manager.send_message(e, "Postponement of consultation")),
+            ft.ElevatedButton("Cancellation of consultation",
+                              on_click=lambda e: my_app.chat_manager.send_message(e, "Cancellation of consultation")),
+        ],
+        alignment=ft.MainAxisAlignment.CENTER  # Align buttons to the center
+    )
+
+    return ft.View(
+        f"/dashboard/{user_id}",
+        bgcolor="#5B7065",
+        controls=[
+            ft.Container(
+                content=ft.Text("Equilibri.Ai", size=42, weight="bold", color="white"),
+                alignment=ft.alignment.top_center,  # Page title centered at top
+                padding=ft.padding.only(top=5, left=20)
+            ),
+            ft.Row(
                 controls=[
-                    ft.Container(  # Top header section
-                        content=ft.Text("Equilibri.Ai", size=42, weight="bold", color="white"),
-                        alignment=ft.alignment.top_center,
-                        padding=ft.padding.only(top=5, left=20)
+                    ft.Container(
+                        content=ft.Column(
+                            controls=[
+                                ft.Text("Menu", size=20, weight="bold", color="white"),
+                                ft.Divider(),  # dividing line
+                                my_app.chat_manager.chat_buttons,  # Chat buttons
+                                ft.TextButton("New Chat", on_click=lambda e: my_app.chat_manager.create_new_chat(e)),
+                            ]
+                        ),
+                        bgcolor="#3A3A3A",
+                        width=250, height=700, padding=10, border_radius=10
                     ),
-                    ft.Row(  # Main content area
-                        controls=[
-                            ft.Container(  # Menu section
-                                content=ft.Column(
-                                    controls=[
-                                        ft.Text("Menu", size=20, weight="bold", color="white"),  # Menu title
-                                        ft.Divider(),  # Divider
-                                        my_app.chat_manager.chat_buttons,  # List of chat buttons
-                                        ft.TextButton("New Chat",
-                                                      on_click=lambda e: my_app.chat_manager.create_new_chat(e)),
-                                    ]
+                    ft.Container(
+                        content=ft.Column(
+                            controls=[
+                                my_app.chat_manager.header,  # Chat Title
+                                ft.Container(
+                                    my_app.chat_manager.chat_display,
+                                    height=400, expand=True, padding=10
                                 ),
-                                bgcolor="#3A3A3A",  # Menu background color
-                                width=250, height=700, padding=10, border_radius=10
-                            ),
-                            ft.Container(  # Chat section
-                                content=ft.Column(
-                                    controls=[
-                                        my_app.chat_manager.header,  # Chat header
-                                        ft.Container(  # Chat display
-                                            my_app.chat_manager.chat_display,
-                                            height=500, expand=True, padding=10
-                                        ),
-                                        ft.Row(  # Message input and send button
-                                            [
-                                                my_app.chat_manager.message_input,
-                                                ft.IconButton(
-                                                    icon=ft.Icons.SEND,
-                                                    icon_color=ft.Colors.BLACK,
-                                                    bgcolor="#edeefa",
-                                                    on_click=my_app.chat_manager.send_message
-                                                )
-                                            ],
-                                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-                                        ),
-                                        ft.Row(  # Clear chat button
-                                            [
-                                                ft.ElevatedButton(
-                                                    "Clear Chat",  # Button to clear chat
-                                                    on_click=lambda e: my_app.chat_manager.clear_chat(e),
-                                                    # Call clear_chat function
-                                                    bgcolor=ft.Colors.WHITE,  # Updated enum
-                                                    color=ft.Colors.BLACK  # Updated enum for text color
-                                                )
-                                            ],
-                                            alignment=ft.MainAxisAlignment.END  # Position button at the end
-                                        ),
-                                    ]
+                                ft.Row(
+                                    [
+                                        my_app.chat_manager.message_input,  # Message input field
+                                        ft.IconButton(
+                                            icon=ft.Icons.SEND,  # Send icon
+                                            icon_color=ft.Colors.BLACK,
+                                            bgcolor="#edeefa",
+                                            on_click=my_app.chat_manager.send_message
+                                        )
+                                    ],
+                                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN  # Alignment to the edges
                                 ),
-                                bgcolor="#2C2C2C", padding=10, border_radius=10, expand=True,
-                            ),
-                        ],
-                        expand=True,
+                                quick_buttons,  # Adding quick reply buttons
+                            ]
+                        ),
+                        bgcolor="#2C2C2C", padding=10, border_radius=10, expand=True,
                     ),
-                    ft.ElevatedButton("Log Out",
-                                      on_click=lambda e: self.user_manager.clear_user_session() or page.go("/")),
-                    # Logout button
-                ]
-            )
+                ],
+                expand=True,
+            ),
+            ft.ElevatedButton("Log Out",  # Exit button
+                              on_click=lambda e: self.user_manager.clear_user_session() or page.go("/")),
+        ]
+    )
 
-        page.on_route_change = route_change
-        page.go("/")
+# Route change handler
+page.on_route_change = route_change
+# Go to main page
+page.go("/")
 
-
-if __name__ == "__main__":
-    db_instance = db.Database('localhost', 'postgres', '0000', 'postgres')  # Initialize database connection
-    connection = db_instance.connection()
-
-    if connection:
-        user_repo = dbc.UserRepository(connection)  # Create user repository if connection is successful
-        app = MyApp(user_repo)
-        ft.app(target=app.main)  # Launch the app
-    else:
-        print("Failed to establish a database connection!")  # Display error if connection fails
