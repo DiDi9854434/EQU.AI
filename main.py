@@ -267,4 +267,4 @@ if __name__ == "__main__":
         app = MyApp(user_repo)
         ft.app(target=app.main)
     else:
-        print("Failed to establish database connection!")
+        print("Failed to establish database connection!") 
