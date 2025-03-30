@@ -1,5 +1,7 @@
 import os
 import webbrowser
+import asyncio
+import openai
 
 import flet as ft
 from flet.core.buttons import ButtonStyle
@@ -195,8 +197,31 @@ class MyApp:
                                                             )
                                                         ],
                                                         alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+
                                                     ),
-                                                    # Новая строка кнопок
+                                                    ft.Row(
+                                                        controls=[
+                                                            ft.ElevatedButton(
+                                                                text="Let's try different techniques",
+                                                                style=ft.ButtonStyle(bgcolor="#1e1e1e", color="white"),
+                                                                on_click=lambda e: my_app.chat_manager.send_message(e,
+                                                                                                                    "Let's try different techniques")
+                                                            ),
+                                                            ft.ElevatedButton(
+                                                                text="Mood check",
+                                                                style=ft.ButtonStyle(bgcolor="#1e1e1e", color="white"),
+                                                                on_click=lambda e: my_app.chat_manager.send_message(e,
+                                                                                                                    "Mood check")
+                                                            ),
+                                                            ft.ElevatedButton(
+                                                                text="Turn on the mode",
+                                                                style=ft.ButtonStyle(bgcolor="#1e1e1e", color="white"),
+                                                                on_click=lambda e: my_app.chat_manager.send_message(e,
+                                                                                                                    "Turn on the mode")
+                                                            ),
+                                                        ],
+                                                        alignment=ft.MainAxisAlignment.CENTER
+                                                    ),
                                                     ft.Row(
                                                         controls=[
                                                             ft.ElevatedButton(
