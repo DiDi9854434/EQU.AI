@@ -11,6 +11,19 @@ class UserRepository:
         )
         self.user_id = user_id
 
+    def reconnect(self):
+        import psycopg2
+        try:
+            self.db_connection = psycopg2.connect(
+                host="localhost",
+                user="postgres",
+                password="0000",
+                dbname="postgres"
+            )
+            print("[INFO] Reconnected to database.")
+        except Exception as e:
+            print(f"[ERROR] Failed to reconnect: {e}")
+
     def delete_chat(self, chat_id):
         try:
             with self.db_connection.cursor() as cursor:
@@ -41,21 +54,57 @@ class UserRepository:
             print(f"Error loading chats: {e}")
             return []
 
+    def get_chat_id_by_name(self, chat_name):
+        try:
+            if self.db_connection.closed:
+                self.reconnect()
 
-    def save_message(self, chat_id, user_id, text, is_bot):
-        conn = self.db_connection
-        if conn:
-            try:
-                with conn.cursor() as cur:
-                    cur.execute(
-                        "INSERT INTO messages (user_id, chat_id, message_text, ms_date, ischat) VALUES (%s, %s, %s, NOW(), %s)",
-                        (user_id, chat_id, text, is_bot)
-                    )
-                    conn.commit()
-            except Exception as e:
-                print(f"Error saving message: {e}")
-            finally:
-                conn.close()
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("SELECT id_chat FROM chats WHERE name = %s", (chat_name,))
+                result = cursor.fetchone()
+                return result[0] if result else None
+        except Exception as e:
+            print(f"[ERROR] get_chat_id_by_name failed: {e}")
+            return None
+
+    def get_messages_by_chat(self, chat_id):
+        try:
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT id_user, message_text, sent_at 
+                    FROM messages 
+                    WHERE id_chat = %s 
+                    ORDER BY sent_at ASC
+                """, (chat_id,))
+                return cursor.fetchall()
+        except Exception as e:
+            print(f"[ERROR] Failed to load messages for chat {chat_id}: {e}")
+            return []
+
+    def save_message(self, chat_name, user_id, message_text, is_bot=False):
+        try:
+            if self.db_connection.closed:
+                print("[INFO] DB connection was closed. Reconnecting...")
+                self.reconnect()
+
+            chat_id = self.get_chat_id_by_name(chat_name)
+            if not chat_id:
+                print(f"[ERROR] Chat '{chat_name}' not found.")
+                return
+
+            with self.db_connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    INSERT INTO messages (chat_id, user_id, message_text, ms_date, ischat)
+                    VALUES (%s, %s, %s, NOW(), %s)
+                    """,
+                    (chat_id, user_id, message_text, not is_bot)  # ischat = True if user
+                )
+                self.db_connection.commit()
+        except Exception as e:
+            if self.db_connection and not self.db_connection.closed:
+                self.db_connection.rollback()
+            print(f"[ERROR] Error saving message: {e}")
 
     def create_chat(self, chat_date):
         try:
