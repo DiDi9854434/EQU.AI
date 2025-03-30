@@ -134,7 +134,6 @@ class MyApp:
                                 content=ft.Text("Equilibri.Ai", size=42, weight="bold", color="white"),
                                 alignment=ft.alignment.center,
                                 padding=ft.padding.only(top=5, left=20)
-
                             ),
                             ft.IconButton(
                                 icon=ft.Icons.MENU_BOOK,
@@ -146,11 +145,9 @@ class MyApp:
                                 ),
                             ),
                             ft.TextButton(
-
-                            on_click=lambda _: webbrowser.open(
-                "https://www.notion.so/EQUILIBRI-AI-PRIVACY-POLICY-AND-USER-AGREEMENT-1c00d7b1732e806ba92fc3942c784022"
-                            ),
-
+                                on_click=lambda _: webbrowser.open(
+                                    "https://www.notion.so/EQUILIBRI-AI-PRIVACY-POLICY-AND-USER-AGREEMENT-1c00d7b1732e806ba92fc3942c784022"
+                                ),
                             ),
                         ]
                     ),
@@ -188,6 +185,32 @@ class MyApp:
                                                     ),
                                                     ft.Row(
                                                         controls=[
+                                                            ft.ElevatedButton(
+                                                                text="Let's try different techniques",
+                                                                style=ft.ButtonStyle(bgcolor="#1e1e1e", color="white"),
+                                                                on_click=lambda e: my_app.chat_manager.send_bot_message(
+                                                                    "1. Reassessment of thoughts\n2. Relaxation techniques",
+                                                                    e
+                                                                )
+                                                            ),
+                                                            ft.ElevatedButton(
+                                                                text="Mood check",
+                                                                style=ft.ButtonStyle(bgcolor="#1e1e1e", color="white"),
+                                                                on_click=lambda e: my_app.chat_manager.send_bot_message(
+                                                                    "How are you feeling right now?", e)
+                                                            ),
+                                                            ft.ElevatedButton(
+                                                                text="Turn on the mode",
+                                                                style=ft.ButtonStyle(bgcolor="#1e1e1e", color="white"),
+                                                                on_click=lambda e: my_app.chat_manager.send_bot_message(
+                                                                    "Focus mode activated 🧘", e)
+                                                            ),
+                                                        ],
+                                                        alignment=ft.MainAxisAlignment.CENTER
+                                                    ),
+
+                                                    ft.Row(
+                                                        controls=[
                                                             my_app.chat_manager.message_input,
                                                             ft.IconButton(
                                                                 icon=ft.Icons.SEND,
@@ -197,30 +220,6 @@ class MyApp:
                                                             )
                                                         ],
                                                         alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-
-                                                    ),
-                                                    ft.Row(
-                                                        controls=[
-                                                            ft.ElevatedButton(
-                                                                text="Let's try different techniques",
-                                                                style=ft.ButtonStyle(bgcolor="#1e1e1e", color="white"),
-                                                                on_click=lambda e: my_app.chat_manager.send_message(e,
-                                                                                                                    "Let's try different techniques")
-                                                            ),
-                                                            ft.ElevatedButton(
-                                                                text="Mood check",
-                                                                style=ft.ButtonStyle(bgcolor="#1e1e1e", color="white"),
-                                                                on_click=lambda e: my_app.chat_manager.send_message(e,
-                                                                                                                    "Mood check")
-                                                            ),
-                                                            ft.ElevatedButton(
-                                                                text="Turn on the mode",
-                                                                style=ft.ButtonStyle(bgcolor="#1e1e1e", color="white"),
-                                                                on_click=lambda e: my_app.chat_manager.send_message(e,
-                                                                                                                    "Turn on the mode")
-                                                            ),
-                                                        ],
-                                                        alignment=ft.MainAxisAlignment.CENTER
                                                     ),
                                                     ft.Row(
                                                         controls=[
@@ -242,7 +241,6 @@ class MyApp:
                                             border_radius=10,
                                             expand=True,
                                         ),
-
                                     ]
                                 ),
                                 expand=True,
@@ -252,7 +250,7 @@ class MyApp:
                     ),
                     ft.ElevatedButton("Exit",
                                       on_click=lambda e: (
-                                      my_app.user_manager.clear_user_session(), page.go("/"), page.update())
+                                          my_app.user_manager.clear_user_session(), page.go("/"), page.update())
                                       )
                 ]
             )
