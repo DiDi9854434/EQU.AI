@@ -2,7 +2,8 @@ import psycopg2
 import hashlib
 
 class UserRepository:
-    def __init__(self, db_connection, user_id = None):
+    def __init__(self, db_connection, user_id=None):
+        # Connect to PostgreSQL database
         self.db_connection = psycopg2.connect(
             host="localhost",
             database="postgres",
@@ -12,7 +13,7 @@ class UserRepository:
         self.user_id = user_id
 
     def reconnect(self):
-        import psycopg2
+        # Method to reconnect to the database
         try:
             self.db_connection = psycopg2.connect(
                 host="localhost",
@@ -25,10 +26,12 @@ class UserRepository:
             print(f"[ERROR] Failed to reconnect: {e}")
 
     def delete_chat(self, chat_id):
+        # Delete a chat by its ID
         try:
             with self.db_connection.cursor() as cursor:
                 cursor.execute("SELECT 1 FROM chats WHERE id_chat = %s", (chat_id,))
-                if not cursor.fetchone():  # If chat not founded
+                if not cursor.fetchone():
+                    # Chat does not exist
                     print(f"Chat {chat_id} does not exist.")
                     return
 
@@ -40,21 +43,23 @@ class UserRepository:
             print(f"Error deleting chat {chat_id}: {e}")
 
     def get_chats_by_user(self):
+        # Get list of chat IDs for the current user
         try:
             # Read user_id from file
             with open("user_session.txt", "r") as file:
-                user_id = file.read().strip()  # Get user_id
+                user_id = file.read().strip()
 
             with self.db_connection.cursor() as cursor:
                 cursor.execute("SELECT id_chat FROM chats WHERE user_id = %s;", (user_id,))
                 chats = cursor.fetchall()
-                return [chat[0] for chat in chats]  # Return list id chats
+                return [chat[0] for chat in chats]  # Return list of chat IDs
 
         except Exception as e:
             print(f"Error loading chats: {e}")
             return []
 
     def get_chat_id_by_name(self, chat_name):
+        # Get chat ID by chat name
         try:
             if self.db_connection.closed:
                 self.reconnect()
@@ -68,6 +73,7 @@ class UserRepository:
             return None
 
     def get_messages_by_chat(self, chat_id):
+        # Get all messages in a chat
         try:
             with self.db_connection.cursor() as cursor:
                 cursor.execute("""
@@ -82,6 +88,7 @@ class UserRepository:
             return []
 
     def save_message(self, chat_name, user_id, message_text, is_bot=False):
+        # Save a message to the database
         try:
             if self.db_connection.closed:
                 print("[INFO] DB connection was closed. Reconnecting...")
@@ -98,7 +105,7 @@ class UserRepository:
                     INSERT INTO messages (chat_id, user_id, message_text, ms_date, ischat)
                     VALUES (%s, %s, %s, NOW(), %s)
                     """,
-                    (chat_id, user_id, message_text, not is_bot)  # ischat = True if user
+                    (chat_id, user_id, message_text, not is_bot)  # ischat = True if user, False if bot
                 )
                 self.db_connection.commit()
         except Exception as e:
@@ -107,8 +114,8 @@ class UserRepository:
             print(f"[ERROR] Error saving message: {e}")
 
     def create_chat(self, chat_date):
+        # Create a new chat with the given date
         try:
-            # Check: if connection was closed, reconnection
             if self.db_connection.closed:
                 print("[INFO] Connection closed. Reconnecting...")
                 self.reconnect()
@@ -128,22 +135,24 @@ class UserRepository:
                 self.db_connection.rollback()
             return None
 
-
+        # The block below is unreachable due to the return above
         except Exception as e:
             print(f"Error creating chat: {e}")
             self.db_connection.rollback()
             return False
 
     def hash_password(self, password):
+        # Hash password using SHA-256
         return hashlib.sha256(password.encode()).hexdigest()
 
     def create_user(self, username, password):
-
+        # Create a new user with hashed password
         try:
             hashed_password = self.hash_password(password)
             with self.db_connection.cursor() as cursor:
                 cursor.execute("SELECT user_id FROM users WHERE user_login = %s;", (username,))
                 if cursor.fetchone():
+                    # Username already exists
                     print("❌ Error: Login already exists!")
                     return False
                 cursor.execute(
@@ -159,29 +168,8 @@ class UserRepository:
             self.db_connection.rollback()
             return False
 
-
-
     def authenticate_user(self, username, password):
+        # Authenticate user login and password
         try:
             with self.db_connection.cursor() as cursor:
-
                 cursor.execute("SELECT user_id, user_password FROM users WHERE user_login = %s;", (username,))
-                result = cursor.fetchone()
-
-                if not result:
-                    print("❌ User not found.")
-                    return False, None
-
-                user_id, stored_password = result
-
-                hashed_password = self.hash_password(password)
-                if hashed_password == stored_password:
-                    print(f"✅ Authorization successful! User ID: {user_id}")
-                    return True, user_id
-
-                print("❌ Invalid password.")
-                return False, None
-
-        except Exception as e:
-            print(f"Authorization error: {e}")
-            return False, None
