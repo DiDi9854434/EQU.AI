@@ -19,13 +19,13 @@ class ChatManager:
         self.selected_messages = set()
         self.load_user_chats()
         self.create_new_chat(None)
-        self.active_technique = None
+        self.active_technique = None #WE ADED THIS FUNCTION FOR AI RESPONSE
 
-    def send_message(self, e, preset_text=None):
+    def send_message(self, e, preset_text=None): #WE ADED SMART RESPONSES
         user_message = preset_text if preset_text else self.message_input.value.strip()
         if user_message:
             if self.current_chat not in self.chat_history:
-                self.chat_history[self.current_chat] = []
+                self.chat_history[self.current_chat] = [] 
 
             message_index = len(self.chat_history[self.current_chat])
             self.user_repo.save_message(self.current_chat, self.user_repo.user_id, user_message, is_bot=False)
@@ -53,7 +53,7 @@ class ChatManager:
             self.message_input.value = ""
             e.page.update()
 
-    def send_bot_message(self, message, e=None):
+    def send_bot_message(self, message, e=None): #ADED NEW FUNCTION
         if not message:
             return
 
@@ -72,7 +72,7 @@ class ChatManager:
         if e and hasattr(e, "page"):
             e.page.update()
 
-    def get_bot_response(self, user_message):
+    def get_bot_response(self, user_message): #NEW FUCTION
         system_prompt = "You are Equilibri.Ai — a helpful, friendly, and smart assistant."
 
         if self.active_technique == "reassessment":
@@ -100,7 +100,7 @@ class ChatManager:
             print(f"[ERROR] OpenAI API call failed: {e}")
             return "Oops! Something went wrong 🤖."
 
-    def create_message_row(self, text, index):
+    def create_message_row(self, text, index): #FOR CHAT INTERFACE CONVINIENCE
         return ft.Row(
             controls=[
                 ft.Checkbox(on_change=lambda e, idx=index: self.toggle_message_selection(idx, e)),
