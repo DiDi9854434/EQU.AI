@@ -10,8 +10,6 @@ from manager import db as db
 
 class ChatManager:
     def __init__(self, user_repo):
-        #user interface elements are created and initialized
-        # self.dbc = dbc
         self.user_repo = user_repo
         self.header = ft.Text("ChatBot", size=20, weight="bold", color="#9C9C9C")
         self.chat_display = ft.ListView(expand=True, height=500)
@@ -62,15 +60,16 @@ class ChatManager:
 
         self.create_new_chat(None)
 
-    def send_message(self, e):
-        user_message = self.message_input.value.strip()
+    def send_message(self, e, preset_text=None):
+
+        user_message = preset_text if preset_text else self.message_input.value.strip()
         if user_message:
             if self.current_chat not in self.chat_history:
                 self.chat_history[self.current_chat] = []
 
             message_index = len(self.chat_history[self.current_chat])
 
-            # Сохраняем сообщение пользователя в базу
+            # Save user`s message to db
             self.user_repo.save_message(self.current_chat, self.user_repo.user_id, user_message, is_bot=False)
 
             self.chat_history[self.current_chat].append((f"You: {user_message}", message_index, "user"))
@@ -78,13 +77,25 @@ class ChatManager:
 
             bot_response = self.get_bot_response(user_message)
 
-            # Сохраняем сообщение бота в базу
+            # save bot`s massages to db
             self.user_repo.save_message(self.current_chat, None, bot_response, is_bot=True)
 
             self.chat_history[self.current_chat].append((f"Bot: {bot_response}", message_index + 1, "bot"))
             self.chat_display.controls.append(self.create_message_row(f"Bot: {bot_response}", message_index + 1))
 
             self.message_input.value = ""
+            e.page.update()
+
+    def send_bot_message(self, message, e=None):
+        if not message:
+            return
+
+        message_index = len(self.chat_history[self.current_chat])
+        # Add messages from bot to db
+        self.chat_history[self.current_chat].append((f"Bot: {message}", message_index, "bot"))
+        self.chat_display.controls.append(self.create_message_row(f"Bot: {message}", message_index))
+
+        if e and hasattr(e, "page"):
             e.page.update()
 
     def create_message_row(self, text, index):#creates a row for a single message to display in the chat
@@ -238,13 +249,11 @@ class ChatManager:
             for idx, msg in enumerate(messages)
         ]
 
-
     def delete_chat_from_db(self, chat_name):
-        """Delete a chat by its name."""
-        chat_id = int(chat_name.split()[-1])  # Take chat_id from "Chat 1"
-        result = self.user_repo.delete_chat(chat_id)  # Call the delete method
-        print(f"Chat {chat_id} deleted from DB" if result else f"Error deleting chat {chat_id}")
-
+        try:
+            self.user_repo.delete_chat(chat_name)
+        except Exception as e:
+            print(f"Error deleting chat from DB: {e}")
 
     def delete_chat(self, chat_name, e):
         """Delete a chat from list and db."""
