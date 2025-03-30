@@ -1,5 +1,5 @@
 import os
-import webbrowser
+import webbrowser  #WE IMPORTED WEBBROWSER, ASYNCIO, OPENAI
 import asyncio
 import openai
 
@@ -141,7 +141,7 @@ class MyApp:
                                 icon_size=20,
                                 tooltip="Open privacy & policy",
                                 on_click=lambda _: webbrowser.open(
-                                    "https://www.notion.so/EQUILIBRI-AI-PRIVACY-POLICY-AND-USER-AGREEMENT-1c00d7b1732e806ba92fc3942c784022"
+                                    "https://www.notion.so/EQUILIBRI-AI-PRIVACY-POLICY-AND-USER-AGREEMENT-1c00d7b1732e806ba92fc3942c784022" #ADED PRIVACY POLICY AND USER AGREEMENT
                                 ),
                             ),
                             ft.TextButton(
@@ -189,7 +189,7 @@ class MyApp:
                                                                 text="Let's try different techniques",
                                                                 style=ft.ButtonStyle(bgcolor="#1e1e1e", color="white"),
                                                                 on_click=lambda e: my_app.chat_manager.send_bot_message(
-                                                                    "1. Reassessment of thoughts\n2. Relaxation techniques",
+                                                                    "1. Reassessment of thoughts\n2. Relaxation techniques", #WE ADED BUTTONS FOR QUICK RESPONSE
                                                                     e
                                                                 )
                                                             ),
