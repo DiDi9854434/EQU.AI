@@ -15,7 +15,7 @@ class UserRepository:
         try:
             with self.db_connection.cursor() as cursor:
                 cursor.execute("SELECT 1 FROM chats WHERE id_chat = %s", (chat_id,))
-                if not cursor.fetchone():  # Если чат не найден
+                if not cursor.fetchone():  # If chat not founded
                     print(f"Chat {chat_id} does not exist.")
                     return
 
@@ -28,7 +28,7 @@ class UserRepository:
 
     def get_chats_by_user(self):
         try:
-            # Читаем user_id из файла
+            # Read user_id from file
             with open("user_session.txt", "r") as file:
                 user_id = file.read().strip()  # Get user_id
 
@@ -40,6 +40,7 @@ class UserRepository:
         except Exception as e:
             print(f"Error loading chats: {e}")
             return []
+
 
     def save_message(self, chat_id, user_id, text, is_bot):
         conn = self.db_connection
@@ -58,19 +59,26 @@ class UserRepository:
 
     def create_chat(self, chat_date):
         try:
-            # Read user_id from file
-            with open("user_session.txt", "r") as file:
-                user_id = file.read().strip()  # Get user_id as string
+            # Check: if connection was closed, reconnection
+            if self.db_connection.closed:
+                print("[INFO] Connection closed. Reconnecting...")
+                self.reconnect()
 
             with self.db_connection.cursor() as cursor:
+                chat_name = f"Chat {chat_date}"
                 cursor.execute(
-                    "INSERT INTO chats (user_id, date) VALUES (%s, %s) RETURNING id_chat;",
-                    (user_id, chat_date)
+                    "INSERT INTO chats (name, date_created) VALUES (%s, %s) RETURNING id_chat",
+                    (chat_name, chat_date)
                 )
                 chat_id = cursor.fetchone()[0]
-                print(f"Chat with id {chat_id} created successfully!")
                 self.db_connection.commit()
-                return True
+                return chat_id
+        except Exception as e:
+            print(f"[ERROR] Failed to create chat: {e}")
+            if self.db_connection and not self.db_connection.closed:
+                self.db_connection.rollback()
+            return None
+
 
         except Exception as e:
             print(f"Error creating chat: {e}")
